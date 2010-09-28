@@ -65,7 +65,7 @@
   (let [s-matrix (matrix 0 (count S) (count S))]
     (loop [i 0
            S S]
-      (if (empty? S)
+      (if (> i 2)
         s-matrix
         (do
           (. s-matrix setQuick i i (first S))

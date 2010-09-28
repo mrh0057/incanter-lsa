@@ -21,10 +21,9 @@
     (is (= (get counts "3") 1))))
 
 (deftest lsa-test
-  (let [docs (list (list "1" "2" "3") (list "3" "2" "4" "5" "5") (list "3" "2" "4" "5" "5"))
+  (let [docs (list (list "1" "2" "3") (list "1" "2" "3" "5") (list "1" "4" "2" "6" "9") (list "4" "9" "48" "2"))
         matrix (lsa docs)]
-    (println (jaccard-index [2 4 3 1 6]
-			   [3 5 1 2 5]))))
+    (println matrix)))
 
 (run-tests)
 
