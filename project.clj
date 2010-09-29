@@ -4,4 +4,5 @@
                  [org.clojure/clojure-contrib "1.2.0"]
                  [incanter "1.2.3-SNAPSHOT"]
                  [org.apache.commons/commons-math "2.1"]]
-  :dev-dependencies [[swank-clojure "1.2.0"]])
+  :dev-dependencies [[swank-clojure "1.2.0"]
+	                   [lein-eclipse "1.0.0"]])

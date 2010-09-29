@@ -10,11 +10,15 @@ The focus of the way the functions work is try to reduce the amount of memory th
 (defn log-lij [tij]
   (log2 (+ tij 1)))
 
-(defn entropy [tij term-probs]
-  )
+(defn entropy [sum-log-eij num-of-docs]
+  (/ sum-log-eij num-of-docs))
 
-(defn log-eij [pij doc-count]
-  )
+(defn log-eij [doc-count all-docs-count]
+  (let [prob (doc-prob doc-count all-docs-count)]
+    (* prob (log2 prob))))
+
+(defn doc-prob [doc-count all-docs-count]
+  (/ doc-count all-docs-count))
 
 (defn find-lowest-word [sorted-documents]
   "Finds the lowest word in a list of words."
@@ -86,18 +90,40 @@ returns - The word count of the words."
         (recur (second word-counts-results)
                (assoc word-counts word (first word-counts-results)))))))
 
-(defn word-porbs-list [docs-sorted word]
+(defn word-count-doc [document word]
+  "Used to get the word count in a document.
+
+document - the document to get the word count from.
+word - the word to count.
+
+returns A list:
+ first is the count
+ second is the new document word list."
+  (loop [document document
+         num 0]
+    (let [current-word (first document)]
+      (if (not= current-word word)
+        (list num document)
+        (recur (rest document) (inc num))))))
+
+(defn word-entropy [docs-sorted word doc-count]
   "Used to get the word probabilities from a document.
 
 docs-sorted - The sorted documents
-word - The current word.")
+word - The current word.
+
+returns A list:
+ first is the entropy for the word
+ second is the new doc list")
 
 (defn calculate-word-entropy [docs-sorted]
   "Calculates the entropy for each word and returns a map of the entropy.
 
 sorted-documents - The sorted documents.
 
-returns - The entropy for all of the words in the documents."
+returns - The entropy for all of the words in the documents.
+key - word
+value - the entropy"
 
   (let [word-count (calculate-word-counts docs-sorted)]
     (loop [docs-sorted docs-sorted

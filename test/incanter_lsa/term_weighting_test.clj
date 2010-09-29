@@ -33,4 +33,9 @@
     (is (= 3 (first word-counts-results)))
     (is ( = documents (list (list "2" "6" "8") (list "2"))))))
 
+(deftest word-count-doc-test
+  (let [word-count (word-count-doc (list "1" "1" "2" "3") "1")]
+    (is (= (first word-count) 2))
+    (is (= (list "2" "3") (second word-count)))))
+
 (run-tests)
