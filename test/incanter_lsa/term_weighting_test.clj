@@ -38,4 +38,20 @@
     (is (= (first word-count) 2))
     (is (= (list "2" "3") (second word-count)))))
 
+(deftest word-entropy-test
+  (let [entropy (word-g 
+                  (list 
+                    (list "1" "1")
+                    (list "1" "2")
+                    (list "2" "3" "s"))
+                  "1" 
+                  3
+                  5)]))
+
+(deftest calculate-word-g-test
+  (let [word-entropy (calculate-word-g (map sort (list (list "1" "4" "3" "5" "2")
+                                                         (list "2" "5" "4" "5")
+                                                         (list "6" "5" "2" "2" "2" "10"))))]
+    (println word-entropy)))
+
 (run-tests)

@@ -1,24 +1,31 @@
 (ns #^{:doc "Has document term weight functions useful in make lsa analysis more accurate.
 
-The focus of the way the functions work is try to reduce the amount of memory they uses."}
+The main focus of the functions is to reduce the amount of memory used."}
     incanter-lsa.term-weighting
     (:import org.apache.commons.math.util.MathUtils))
 
-(defn- log2 [a]
-  (MathUtils/log a 2))
+(defn log2 [a]
+  (MathUtils/log 2 a))
 
 (defn log-lij [tij]
   (log2 (+ tij 1)))
 
 (defn entropy [sum-log-eij num-of-docs]
+  "Used to calculate the entropy."
   (/ sum-log-eij num-of-docs))
+
+(defn g-log [sum-log-eij num-of-docs]
+  (- 1 (entropy sum-log-eij num-of-docs)))
+
+(defn doc-prob [doc-count all-docs-count]
+  "Calculates the probability of the word in a document."
+  (/ doc-count all-docs-count))
 
 (defn log-eij [doc-count all-docs-count]
   (let [prob (doc-prob doc-count all-docs-count)]
-    (* prob (log2 prob))))
-
-(defn doc-prob [doc-count all-docs-count]
-  (/ doc-count all-docs-count))
+    (if (= prob 0)
+      0
+      (* prob (log2 prob)))))
 
 (defn find-lowest-word [sorted-documents]
   "Finds the lowest word in a list of words."
@@ -106,18 +113,28 @@ returns A list:
         (list num document)
         (recur (rest document) (inc num))))))
 
-(defn word-entropy [docs-sorted word doc-count]
-  "Used to get the word probabilities from a document.
+(defn word-g [docs-sorted word word-counts doc-count]
+  "Used to get the word g values from the documents.
 
 docs-sorted - The sorted documents
 word - The current word.
 
 returns A list:
  first is the entropy for the word
- second is the new doc list")
+ second is the new doc list"
+  (loop [docs-sorted docs-sorted
+         new-docs ()
+         current-prob 0]
+    (if (empty? docs-sorted)
+      (list (g-log current-prob doc-count) new-docs)
+      (let [word-count (word-count-doc (first docs-sorted) word)]
+        (recur 
+          (rest docs-sorted) 
+          (conj-not-nil new-docs (second word-count)) 
+          (+ current-prob (log-eij (first word-count) word-counts)))))))
 
-(defn calculate-word-entropy [docs-sorted]
-  "Calculates the entropy for each word and returns a map of the entropy.
+(defn calculate-word-g [docs-sorted]
+  "Calculates the g value for each word and returns a map of the g.
 
 sorted-documents - The sorted documents.
 
@@ -125,10 +142,17 @@ returns - The entropy for all of the words in the documents.
 key - word
 value - the entropy"
 
-  (let [word-count (calculate-word-counts docs-sorted)]
+  (let [word-count (calculate-word-counts docs-sorted)
+        doc-count (count docs-sorted)]
     (loop [docs-sorted docs-sorted
-           entropy {}]
+           entropy {}
+           word (find-lowest-word docs-sorted)]
       (if (empty? docs-sorted)
-        entropy))))
+        entropy
+        (let [word-entro (word-g docs-sorted word (get word-count word) doc-count)
+              docs-sorted (second word-entro)]
+          (recur docs-sorted 
+            (assoc entropy word (first word-entro))
+            (find-lowest-word docs-sorted)))))))
 
 (defn probs [documents])
