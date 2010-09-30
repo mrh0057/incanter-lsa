@@ -2,17 +2,16 @@
 
 The main focus of the functions is to reduce the amount of memory used."}
     incanter-lsa.term-weighting
+  (:use incanter.core
+    incanter-lsa.core)
     (:import org.apache.commons.math.util.MathUtils))
-
-(defn log2 [a]
-  (MathUtils/log 2 a))
 
 (defn log-lij [tij]
   (log2 (+ tij 1)))
 
 (defn entropy [sum-log-eij num-of-docs]
   "Used to calculate the entropy."
-  (/ sum-log-eij num-of-docs))
+  (/ sum-log-eij (log2 num-of-docs)))
 
 (defn g-log [sum-log-eij num-of-docs]
   (- 1 (entropy sum-log-eij num-of-docs)))
@@ -21,22 +20,18 @@ The main focus of the functions is to reduce the amount of memory used."}
   "Calculates the probability of the word in a document."
   (/ doc-count all-docs-count))
 
+(defn word-weight [tij g-value]
+  "
+tij - Is the word frequency.
+g-value - The g-value.
+Returns the word rate."
+  (* (log-lij tij) g-value))
+
 (defn log-eij [doc-count all-docs-count]
   (let [prob (doc-prob doc-count all-docs-count)]
     (if (= prob 0)
       0
       (* prob (log2 prob)))))
-
-(defn find-lowest-word [sorted-documents]
-  "Finds the lowest word in a list of words."
-  (loop [sorted-docs (rest sorted-documents)
-         word (first (first sorted-documents))]
-    (if (empty? sorted-docs)
-      word
-      (let [curr-word (first (first sorted-docs))]
-        (if ( < (. curr-word compareTo word) 0)
-          (recur (rest sorted-docs) curr-word)
-          (recur (rest sorted-docs) word))))))
 
 (defn word-count-list [word document]
   "Returns the list and word count for the document"
@@ -138,10 +133,11 @@ returns A list:
 
 sorted-documents - The sorted documents.
 
-returns - The entropy for all of the words in the documents.
-key - word
-value - the entropy"
-
+returns - 
+The g value for all of the words in the documents.
+   key - word
+   value - the entropy
+"
   (let [word-count (calculate-word-counts docs-sorted)
         doc-count (count docs-sorted)]
     (loop [docs-sorted docs-sorted

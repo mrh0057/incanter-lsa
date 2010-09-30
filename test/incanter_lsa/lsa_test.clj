@@ -1,7 +1,8 @@
 (ns incanter-lsa.lsa-test
   (:use incanter-lsa.lsa
+        incanter-lsa.term-weighting
         incanter.core
-        incanter.stats
+        incanter-lsa.stats
         clojure.test))
 
 (deftest create-word-map-test
@@ -11,7 +12,8 @@
 
 (deftest create-document-matrix-test
   (let [docs (list (list "1" "2" "3") (list "3" "2" "4" "5" "5"))
-        doc-matrix (create-document-matrix docs)]))
+        doc-matrix (create-document-matrix docs (fn [word-count word]
+                                                  word-count))]))
 
 (deftest get-document-count-test
   (let [document (list "3" "2" "4" "5" "5")
@@ -21,9 +23,12 @@
     (is (= (get counts "3") 1))))
 
 (deftest lsa-test
-  (let [docs (list (list "1" "2" "3") (list "1" "2" "3" "5") (list "1" "4" "2" "6" "9") (list "4" "9" "48" "2"))
-        matrix (lsa docs)]
-    (println matrix)))
+  (let [docs (list (list "1" "2" "3" "10" "25" "50") (list "1" "2" "3" "5" "9" "13") (list "1" "3" "6" "9") (list "1" "3" "6" "9"))
+        g-weights (calculate-word-g docs)
+        matrix (lsa docs (fn [word-count word]
+                           (word-weight word-count (get g-weights word))))]
+    (println matrix)
+    (println (cos-similarity (sel matrix :cols 0) (sel matrix :cols 3)))))
 
 (run-tests)
 

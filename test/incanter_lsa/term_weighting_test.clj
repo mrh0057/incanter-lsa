@@ -5,10 +5,6 @@
 (deftest log-lij-test
   (= 2 (log-lij 1)))
 
-(deftest find-lowest-word-test
-  (let [lowest (find-lowest-word (list (list "2") (list "1") (list "1")))]
-    (is (= lowest "1"))))
-
 (deftest word-count-list-test
   (let [word-count (word-count-list "1" (list "1" "1" "1" "2" "2"))]
     (is (= 3 (first word-count)))
@@ -38,7 +34,7 @@
     (is (= (first word-count) 2))
     (is (= (list "2" "3") (second word-count)))))
 
-(deftest word-entropy-test
+(deftest word-g-test
   (let [entropy (word-g 
                   (list 
                     (list "1" "1")
@@ -46,12 +42,15 @@
                     (list "2" "3" "s"))
                   "1" 
                   3
-                  5)]))
+                  5)]
+    (= (list (list "2" "3" "s") (list "2")) (second entropy))
+    (= 1.3954884891037234 (first entropy))))
 
 (deftest calculate-word-g-test
-  (let [word-entropy (calculate-word-g (map sort (list (list "1" "4" "3" "5" "2")
+  (let [word-g (calculate-word-g (map sort (list (list "1" "4" "3" "5" "2")
                                                          (list "2" "5" "4" "5")
                                                          (list "6" "5" "2" "2" "2" "10"))))]
-    (println word-entropy)))
+    (is (get word-g "10" 1))
+    (is (get word-g "5" 1.5))))
 
 (run-tests)
