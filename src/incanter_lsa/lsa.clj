@@ -47,7 +47,6 @@
            word-counts (get-document-count (first documents))
            word (keys word-counts)
            col 0]
-      (println word-counts)
       (if (empty? documents)
         doc-matrix
         (if (empty? word)
@@ -63,15 +62,24 @@
                    (rest word)
                    col)))))))
 
-(defn create-sigma [S]
+(defn- create-sigma-matrix [S dems]
   (let [s-matrix (matrix 0 (count S) (count S))]
     (loop [i 0
            S S]
-      (if (> i 3)
+      (if (> i dems)
         s-matrix
         (do
           (. s-matrix setQuick i i (first S))
           (recur (inc i) (rest S)))))))
+
+(defn create-sigma [S]
+  "USed to create the sigma matrix.
+
+S - The sigma list."
+  (if (< (count S) 102)
+    (let [dem (/ (count S) 2)]
+      (create-sigma-matrix S dem))
+    (create-sigma (drop 2 S) 100)))
 
 (defn lsa [documents weight-function]
   "Returns the SVD matrix.
@@ -85,3 +93,15 @@ The list documents and then a list of tokens."
         svd (decomp-svd doc-matrix)
         S (:S svd)]
     (mmult (sel (:U svd) :cols (range (count S))) (create-sigma S) (:V svd))))
+
+(defn document-confusion-matrix [lsa-matrix stat-func]
+  (loop [x 0
+         y 0
+         matrix (matrix (ncol lsa-matrix) (ncol lsa-matrix))]
+    (if (>= x (ncol lsa-matrix))
+      matrix
+      (if (>= y (ncol lsa-matrix))
+        (recur (inc x) 0 matrix)
+        (do
+          (. matrix setQuick x y (stat-func (sel lsa-matrix :cols x) (sel lsa-matrix :cols y)))
+          (recur x (inc y) matrix))))))

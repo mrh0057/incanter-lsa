@@ -1,10 +1,10 @@
 (ns #^{:doc "Has document term weight functions useful in make lsa analysis more accurate.
 
 The main focus of the functions is to reduce the amount of memory used."}
-    incanter-lsa.term-weighting
-  (:use incanter.core
-    incanter-lsa.core)
-    (:import org.apache.commons.math.util.MathUtils))
+ incanter-lsa.term-weighting
+ (:use incanter.core
+   incanter-lsa.core)
+ (:import org.apache.commons.math.util.MathUtils))
 
 (defn log-lij [tij]
   (log2 (+ tij 1)))
@@ -70,12 +70,12 @@ second - new list of documents."
       (list word-count new-docs)
       (if (empty? (first documents))
         (recur (rest documents)
-               (conj new-docs nil)
-               word-count)
+          (conj new-docs nil)
+          word-count)
         (let [word-count-results (word-count-list word (first documents))]
           (recur (rest documents)
-                 (conj-not-nil new-docs (second word-count-results))
-                 (+ (first word-count-results) word-count)))))))
+            (conj-not-nil new-docs (second word-count-results))
+            (+ (first word-count-results) word-count)))))))
 
 (defn calculate-word-counts [documents]
   "Calculates the word counts for the documents
@@ -90,7 +90,7 @@ returns - The word count of the words."
       (let [word (find-lowest-word docs-sorted)
             word-counts-results (total-word-count word docs-sorted '())]
         (recur (second word-counts-results)
-               (assoc word-counts word (first word-counts-results)))))))
+          (assoc word-counts word (first word-counts-results)))))))
 
 (defn word-count-doc [document word]
   "Used to get the word count in a document.
@@ -99,8 +99,8 @@ document - the document to get the word count from.
 word - the word to count.
 
 returns A list:
- first is the count
- second is the new document word list."
+first is the count
+second is the new document word list."
   (loop [document document
          num 0]
     (let [current-word (first document)]
@@ -115,8 +115,8 @@ docs-sorted - The sorted documents
 word - The current word.
 
 returns A list:
- first is the entropy for the word
- second is the new doc list"
+first is the entropy for the word
+second is the new doc list"
   (loop [docs-sorted docs-sorted
          new-docs ()
          current-prob 0]
@@ -135,8 +135,8 @@ sorted-documents - The sorted documents.
 
 returns - 
 The g value for all of the words in the documents.
-   key - word
-   value - the entropy
+key - word
+value - the entropy
 "
   (let [word-count (calculate-word-counts docs-sorted)
         doc-count (count docs-sorted)]
