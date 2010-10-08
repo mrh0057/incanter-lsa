@@ -62,24 +62,42 @@
                    (rest word)
                    col)))))))
 
-(defn- create-sigma-matrix [S dems]
-  (let [s-matrix (matrix 0 (count S) (count S))]
-    (loop [i 0
+(defn- create-sigma-matrix [S start dems]
+  (let [s-matrix (matrix 0 dems dems)]
+    (loop [i start
            S S]
-      (if (> i dems)
+      (if (>= i dems)
         s-matrix
         (do
           (. s-matrix setQuick i i (first S))
           (recur (inc i) (rest S)))))))
 
-(defn create-sigma [S]
+(defn- create-u-matrix [U start dems]
+  "Used to create the u matrix with the reduction of the specifid demenisions.
+
+U - The U matrix to use.
+start - The starting point of the dems to remove.
+dems - The dems to keep after the starting point.
+
+returns U'"
+  (sel U :cols (range start dems)))
+
+(defn- create-v-matrix [V start dems]
+  "Used to create the v' matrix with the reduction of the specified demenisions.
+
+V - The V matrix to use.
+start - The startin point of the dems to remove.
+dems - The number of dems to keep after the starting point."
+  (trans (sel V :cols (range start dems))))
+
+(defn get-dems [S]
   "USed to create the sigma matrix.
 
 S - The sigma list."
-  (if (< (count S) 102)
+  (if (< (count S) 200)
     (let [dem (/ (count S) 2)]
-      (create-sigma-matrix S dem))
-    (create-sigma (drop 2 S) 100)))
+      (list 0 dem))
+    (list 2 100)))
 
 (defn lsa [documents weight-function]
   "Returns the SVD matrix.
@@ -91,10 +109,20 @@ weight-function - The function used to calculate the weights.
 The list documents and then a list of tokens."
   (let [doc-matrix (create-document-matrix documents weight-function)
         svd (decomp-svd doc-matrix)
-        S (:S svd)]
-    (mmult (sel (:U svd) :cols (range (count S))) (create-sigma S) (:V svd))))
+        S (:S svd)
+        dems (get-dems S)]
+    (mmult (create-u-matrix (:U svd) (first dems) (second dems))
+           (create-sigma-matrix S (first dems) (second dems))
+           (create-v-matrix (:V svd) (first dems) (second dems)))))
 
 (defn document-confusion-matrix [lsa-matrix stat-func]
+  "Returns the confusion matrix using the stats function.
+
+lsa-matrix - The lsa-matrix used to calculate the similarity.
+stat-func - The stat function.
+
+returns The confusion matrix.
+"
   (loop [x 0
          y 0
          matrix (matrix (ncol lsa-matrix) (ncol lsa-matrix))]

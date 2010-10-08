@@ -27,6 +27,7 @@
         g-weights (calculate-word-g docs)
         matrix (lsa docs (fn [word-count word]
                            (word-weight word-count (get g-weights word))))]
+    (println matrix)
     (println (document-confusion-matrix matrix cos-similarity))))
 
 (run-tests)
