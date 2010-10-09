@@ -1,6 +1,7 @@
 (ns incanter-lsa.lsa
   (:use incanter.core
-    incanter-lsa.core
+        incanter-lsa.core
+        [clojure.contrib.math :only (round)]
     incanter-lsa.term-weighting))
 
 (defn create-word-map [documents]
@@ -95,7 +96,7 @@ dems - The number of dems to keep after the starting point."
 
 S - The sigma list."
   (if (< (count S) 200)
-    (let [dem (/ (count S) 2)]
+    (let [dem (round (/ (count S) 2))]
       (list 0 dem))
     (list 2 100)))
 

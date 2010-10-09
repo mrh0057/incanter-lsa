@@ -1,4 +1,4 @@
-(defproject incanter-lsa "1.0.0-SNAPSHOT"
+(defproject incanter-lsa "0.1.0-SNAPSHOT"
   :description "A simple lsa library for clojure."
   :dependencies [[org.clojure/clojure "1.2.0"]
                  [org.clojure/clojure-contrib "1.2.0"]
