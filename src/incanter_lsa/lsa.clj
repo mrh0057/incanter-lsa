@@ -2,7 +2,16 @@
   (:use incanter.core
         incanter-lsa.core
         [clojure.contrib.math :only (round)]
-    incanter-lsa.term-weighting))
+        incanter-lsa.term-weighting))
+
+(def
+ ^{:private true}
+ percent 0.30)
+
+(defn set-dimenisions-percent-to-take [percentage]
+  "Used to set the global percent to take.  Note if the number to take exceeds 102 the lsa will only take 100 demenision dropping
+the two highests in the sigma matrix"
+  (def percent percentage))
 
 (defn create-word-map [documents]
   "Creates a hashmap with the key being the work and value being the position."
@@ -64,7 +73,7 @@
                    col)))))))
 
 (defn- create-sigma-matrix [S start dems]
-  (let [s-matrix (matrix 0 dems dems)]
+  (let [s-matrix (matrix 0 (int dems) (int dems))]
     (loop [i start
            S S]
       (if (>= i dems)
@@ -95,8 +104,8 @@ dems - The number of dems to keep after the starting point."
   "USed to create the sigma matrix.
 
 S - The sigma list."
-  (if (< (count S) 200)
-    (let [dem (round (/ (count S) 2))]
+  (if (< (count S) (/ 100 percent))
+    (let [dem (round (* (count S) percent))]
       (list 0 dem))
     (list 2 100)))
 

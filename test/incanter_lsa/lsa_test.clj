@@ -23,6 +23,7 @@
     (is (= (get counts "3") 1))))
 
 (deftest lsa-test
+  (set-dimenisions-percent-to-take 0.50)
   (let [docs (list (list "1" "2" "3" "10" "25" "50") (list "1" "2" "3" "5" "9" "13") (list "1" "3" "6" "9") (list "1" "3" "6" "9") (list "1" "4" "8" "16") (list "4" "10" "20" "40" "45"))
         g-weights (calculate-word-g docs)
         matrix (lsa docs (fn [word-count word]
